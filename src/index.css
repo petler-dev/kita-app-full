@@ -1,0 +1,308 @@
+* {
+  box-sizing: border-box
+}
+body {
+  background: url('https://source.unsplash.com/1600x900/?rainbow,paint') no-repeat center center/cover;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+#wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mitarbaiter .category-container {
+  margin-top: 40px;
+}
+
+.mitarbaiter .container {
+  min-width: 800px;
+}
+.container {
+  max-width: 800px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px 15px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Заголовок --- */
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff6600;
+  margin-bottom: 30px;
+}
+
+/* --- Инпуты и textarea --- */
+.input-field, .input-textarea {
+  width: 100%;
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-size: 16px;
+  border: 1px solid #ffcc00;
+  background: #fff8e1;
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.input-field:focus, .input-textarea:focus {
+  outline: none;
+  border-color: #ff8800;
+  box-shadow: 0 0 12px rgba(255, 136, 0, 0.8);
+}
+
+.input-textarea {
+  height: 80px;
+  resize: none;
+  margin-top: 10px;
+}
+
+.input-field:hover, .input-textarea:hover, select:hover {
+  border-color: #ff8800;
+  box-shadow: 0 0 8px rgba(255, 136, 0, 0.6);
+}
+
+/* --- Кнопки --- */
+.btn {
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-json {
+  display:inline-block
+}
+
+.btn-gray { background: #ccc; }
+.btn-yellow { background: #ffcc00; color: black; }
+.btn-green { background: #4CAF50; color: white; }
+.btn-blue { background: #007BFF; color: white; }
+.btn-primary { background: #FF5733; color: white; }
+
+.btn:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* --- Подсветка активной кнопки --- */
+.btn-active {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+.question-block {
+  position: relative;
+  padding: 20px;
+  border-bottom: 2px solid #ff6600;
+}
+
+.question-block:last-child {
+  border-bottom: none;
+}
+
+.btn-close {
+  padding: 0;
+  margin: 0;
+  outline: none;
+  background: none;
+  border: none;
+  position: absolute;
+  right: 0;
+  top: 12px;
+  cursor: pointer;
+}
+
+/* --- Группа кнопок --- */
+.button-group {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.button-group .btn {
+  width: auto;
+  margin: 0 3px 15px;
+}
+
+.button-color .btn {
+  padding: 10px 15px;
+  font-size: 14px;
+}
+
+.button-group .btn:last-child {
+  margin: 0 0 15px;
+}
+
+/* --- Поле комментариев --- */
+.comment-section {
+  margin-top: 20px;
+}
+
+/* --- Блок вопроса --- */
+.question-container {
+  background: rgba(255, 255, 255, 0.98);
+  padding: 30px;
+  border-radius: 20px;
+  margin-top: 20px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Стили для активной (выбранной) кнопки */
+
+.selected {
+  transform: scale(1.05);
+  transition: all 0.3s;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.8);
+}
+
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+.btn-gray {
+  background-color: #d3d3d3;
+  color: black;
+}
+
+.btn-yellow {
+  background-color: #ffd700;
+  color: black;
+}
+
+.btn-green {
+  background-color: #32cd32;
+  color: white;
+}
+
+/* Контейнер категории */
+.category-container {
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid #ffa500; /* Оранжевая полоса сбоку */
+}
+
+/* Заголовок категории */
+.category-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Разделительная линия */
+.category-divider {
+  height: 2px;
+  background-color: #ccc;
+  margin: 10px 0;
+}
+
+/* Контейнер для вопросов внутри категории */
+.questions-container {
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.error-border {
+  border: 2px solid red !important;
+}
+
+.warning-text {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  display: none;
+}
+
+.warning-text.show {
+  display: block;
+}
+
+.error-border + .warning-text {
+  display: block;
+}
+
+.input-group {
+  margin-bottom: 35px;
+}
+
+@media (min-width: 800px) {
+  .container {
+    min-width: 800px;
+  }
+}
+
+@media (min-width: 768px) {
+
+  .input-field, .input-textarea {
+    padding: 15px;
+    border: 2px solid #ffcc00;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .btn {
+    padding: 12px 30px;
+    font-size: 20px;
+    margin: 10px;
+    width: auto;
+  }
+
+  .btn.btn-blue {
+    margin-bottom: 20px;
+  }
+
+  .button-group {
+    justify-content: space-around;
+    flex-direction: row;
+    margin-bottom: 20px;
+    width: auto;
+  }
+
+  .button-group .btn {
+    width: auto;
+    margin: 10px 0;
+  }
+
+  .button-group .btn:last-child {
+    margin: 10px 0;
+  }
+
+  .button-color .btn {
+    width: auto;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .container {
+    padding: 40px;
+  }
+}
+
+

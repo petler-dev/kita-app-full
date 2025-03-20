@@ -1,0 +1,58 @@
+{
+  "name": "kita-assessment",
+  "version": "1.0.0",
+  "description": "An app for child assessment in kindergarten",
+  "author": "Yevhenii Petler",
+  "main": "main.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "electron-start": "electron .",
+    "electron-pack": "electron-builder"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^5.0.2",
+    "mysql2": "^3.13.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-scripts": "latest",
+    "web-vitals": "^4.2.4"
+  },
+  "devDependencies": {
+    "electron": "^35.0.2",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.kita.assessment",
+    "productName": "Kita Assessment",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "files": [
+      "build/**/*",
+      "main.js"
+    ],
+    "asar": false
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
