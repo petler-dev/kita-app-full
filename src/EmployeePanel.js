@@ -131,7 +131,11 @@ export default function EmployeePanel() {
 
                 doc.setFontSize(14);
                 doc.setFont("helvetica", "bold");
-                doc.text(`${qIndex + 1}. ${q?.text || "-"}`, 15, y);
+
+                // Разбиваем текст вопроса на строки
+                const questionLines = doc.splitTextToSize(`${qIndex + 1}. ${q?.text || "-"}`, 180);
+                doc.text(questionLines, 15, y);
+                y += questionLines.length * 6; // Увеличиваем y в зависимости от количества строк
 
                 doc.setTextColor(...color);
                 doc.text(q?.answer || "-", 180, y, { align: "right" });
@@ -142,8 +146,11 @@ export default function EmployeePanel() {
                 if (q?.comment?.trim()) {
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Kommentar: ${q.comment}`, 15, y);
-                    y += 6;
+
+                    // Разбиваем текст комментария на строки
+                    const commentLines = doc.splitTextToSize(`Kommentar: ${q.comment}`, 180);
+                    doc.text(commentLines, 15, y);
+                    y += commentLines.length * 6; // Увеличиваем y в зависимости от количества строк
                 }
 
                 y += 10;
