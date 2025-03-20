@@ -49,7 +49,7 @@ export default function AdminPanel() {
     };
 
     const handleAddCategory = () => {
-        const newCategory = { id: Date.now(), name: "Neue Kategorie", questions: [] };
+        const newCategory = { id: Date.now(), name: "", questions: [] };
         setCategories([...categories, newCategory]);
     };
 
