@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import {
+    getCategories,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    addQuestion,
+    deleteQuestion,
+    updateQuestion
+} from "./api";
 
 export default function AdminPanel() {
-    const loadCategories = () => {
-        const savedCategories = localStorage.getItem("categories");
-        return savedCategories ? JSON.parse(savedCategories) : [];
-    };
-
-    const [categories, setCategories] = useState(loadCategories());
+    const [categories, setCategories] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -27,8 +31,14 @@ export default function AdminPanel() {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem("categories", JSON.stringify(categories));
-    }, [categories]);
+        if (isAuthenticated) {
+            const fetchCategories = async () => {
+                const data = await getCategories();
+                setCategories(data);
+            };
+            fetchCategories();
+        }
+    }, [isAuthenticated]);
 
     const handleLogin = () => {
         const admin = admins.find(
@@ -48,26 +58,28 @@ export default function AdminPanel() {
         localStorage.removeItem("isAuthenticated");
     };
 
-    const handleAddCategory = () => {
-        const newCategory = { id: Date.now(), name: "", questions: [] };
+    const handleAddCategory = async () => {
+        const newCategory = await addCategory("Neue Kategorie");
         setCategories([...categories, newCategory]);
     };
 
-    const handleDeleteCategory = (categoryId) => {
-        const updatedCategories = categories.filter(cat => cat.id !== categoryId);
-        setCategories(updatedCategories);
+    const handleDeleteCategory = async (categoryId) => {
+        await deleteCategory(categoryId);
+        setCategories(categories.filter(cat => cat.id !== categoryId));
     };
 
-    const handleAddQuestion = (categoryId) => {
+    const handleAddQuestion = async (categoryId) => {
+        const newQuestion = await addQuestion(categoryId, "");
         const updatedCategories = categories.map(cat =>
             cat.id === categoryId
-                ? { ...cat, questions: [...cat.questions, { id: Date.now(), text: "" }] }
+                ? { ...cat, questions: [...(cat.questions || []), newQuestion]}
                 : cat
         );
         setCategories(updatedCategories);
     };
 
-    const handleDeleteQuestion = (questionId, categoryId) => {
+    const handleDeleteQuestion = async (questionId, categoryId) => {
+        await deleteQuestion(categoryId, questionId);
         const updatedCategories = categories.map(cat =>
             cat.id === categoryId
                 ? { ...cat, questions: cat.questions.filter(q => q.id !== questionId) }
@@ -76,27 +88,9 @@ export default function AdminPanel() {
         setCategories(updatedCategories);
     };
 
-    const handleSaveToJson = () => {
-        const jsonData = JSON.stringify(categories, null, 2);
-        const blob = new Blob([jsonData], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "categories.json";
-        link.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const handleLoadFromJson = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const loadedCategories = JSON.parse(e.target.result);
-                setCategories(loadedCategories);
-            };
-            reader.readAsText(file);
-        }
+    const handleSyncToLocalStorage = () => {
+        localStorage.setItem("categories", JSON.stringify(categories));
+        alert("Kategorien wurden für Mitarbeiter gespeichert.");
     };
 
     if (!isAuthenticated) {
@@ -135,7 +129,7 @@ export default function AdminPanel() {
     }
 
     return (
-        <div id="wrapper">
+        <div id="wrapper" className="admin-panel">
             <div className="container">
                 <div className="admin-panel">
                     <h1>🛠 Admin Panel</h1>
@@ -143,22 +137,11 @@ export default function AdminPanel() {
                         🔒 Abmelden
                     </button>
 
-                    <button className="btn btn-green" onClick={handleSaveToJson}>
-                        💾 Speichern als JSON
-                    </button>
-
-                    <label className="btn btn-blue btn-json">
-                        📂 Laden aus JSON
-                        <input
-                            type="file"
-                            accept=".json"
-                            style={{ display: "none" }}
-                            onChange={handleLoadFromJson}
-                        />
-                    </label>
-
                     <button className="btn btn-yellow" onClick={handleAddCategory}>
                         ➕ Kategorie hinzufügen
+                    </button>
+                    <button className="btn btn-green" onClick={handleSyncToLocalStorage}>
+                        💾 Für Mitarbeiter speichern
                     </button>
 
                     {categories.length === 0 && <p>⚠ Noch keine Kategorien erstellt</p>}
@@ -174,6 +157,7 @@ export default function AdminPanel() {
                                         cat.id === category.id ? { ...cat, name: e.target.value } : cat
                                     );
                                     setCategories(updatedCategories);
+                                    updateCategory(category.id, e.target.value);
                                 }}
                             />
 
@@ -184,7 +168,7 @@ export default function AdminPanel() {
                                 🗑️ Kategorie löschen
                             </button>
 
-                            {category.questions.length > 0 && (
+                            {category.questions?.length > 0 && (
                                 <div className="questions-container">
                                     {category.questions.map((q) => (
                                         <div key={q.id} className="question-block">
@@ -206,6 +190,7 @@ export default function AdminPanel() {
                                                             : cat
                                                     );
                                                     setCategories(updatedCategories);
+                                                    updateQuestion(category.id, q.id, e.target.value);
                                                 }}
                                             />
                                             <button className="btn btn-red" onClick={() => handleDeleteQuestion(q.id, category.id)}>

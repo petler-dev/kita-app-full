@@ -110,6 +110,10 @@ body {
   border-bottom: none;
 }
 
+.admin-panel .question-block .input-field{
+  margin-bottom: 15px;
+}
+
 .btn-close {
   padding: 0;
   margin: 0;
@@ -255,6 +259,10 @@ body {
 }
 
 @media (min-width: 768px) {
+
+  .admin-panel .question-block .input-field{
+    margin-bottom: 0;
+  }
 
   .input-field, .input-textarea {
     padding: 15px;

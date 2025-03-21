@@ -1,13 +1,33 @@
 import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
+import { getCategories } from "./api"; // Импорт API
 
 export default function EmployeePanel() {
-    const loadCategories = () => {
-        const savedCategories = localStorage.getItem("categories");
-        return savedCategories ? JSON.parse(savedCategories) : [];
-    };
 
-    const [categories, setCategories] = useState(loadCategories());
+    const [categories, setCategories] = useState([]);
+
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getCategories();
+                setCategories(data);
+            } catch (error) {
+                console.error("Fehler beim Laden der Kategorien:", error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleRefresh = async () => {
+        try {
+            const data = await getCategories();
+            setCategories(data);
+        } catch (error) {
+            console.error("Fehler beim Aktualisieren:", error);
+        }
+    };
     const [currentCategory, setCurrentCategory] = useState(0);
     const [childData, setChildData] = useState({
         name: "",
@@ -19,10 +39,6 @@ export default function EmployeePanel() {
     });
     const [visitedCategories, setVisitedCategories] = useState([]);
     const [allVisited, setAllVisited] = useState(false);
-
-    useEffect(() => {
-        setCategories(loadCategories());
-    }, []);
 
     // ✅ Добавляем текущую категорию в visitedCategories при изменении currentCategory
     useEffect(() => {
@@ -167,6 +183,10 @@ export default function EmployeePanel() {
             <div className="container">
                 <h1>👩‍🏫 Mitarbeiter-Bereich</h1>
 
+                <button className="btn btn-blue" onClick={handleRefresh}>
+                    🔄 Kategorien aktualisieren
+                </button>
+
                 <div className="input-group">
                     {/* 📋 Данные ребёнка */}
                     <div className="form-group">
@@ -245,27 +265,28 @@ export default function EmployeePanel() {
                 {categories.length > 0 && (
                     <div className="category-container">
                         <h2>{categories[currentCategory].name}</h2>
-
+                        <div className="question-holder">
                         {categories[currentCategory].questions.map((q) => (
-                            <div key={q.id} className="question-block">
-                                <p>{q.text}</p>
-                                <div className="button-group button-color">
-                                    <button className={`btn btn-gray ${q.answer === "Ich weiß nicht" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Ich weiß nicht")}>Ich weiß nicht</button>
-                                    <button className={`btn btn-yellow ${q.answer === "Kann es teilweise" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Kann es teilweise")}>Kann es teilweise</button>
-                                    <button className={`btn btn-green ${q.answer === "Kann es" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Kann es")}>Kann es</button>
+                                <div key={q.id} className="question-block">
+                                    <p>{q.text}</p>
+                                    <div className="button-group button-color">
+                                        <button className={`btn btn-gray ${q.answer === "Ich weiß nicht" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Ich weiß nicht")}>Ich weiß nicht</button>
+                                        <button className={`btn btn-yellow ${q.answer === "Kann es teilweise" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Kann es teilweise")}>Kann es teilweise</button>
+                                        <button className={`btn btn-green ${q.answer === "Kann es" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Kann es")}>Kann es</button>
+                                    </div>
+                                    <textarea
+                                        className="input-textarea"
+                                        placeholder="Kommentar hinzufügen"
+                                        value={q.comment || ""}
+                                        onChange={(e) => handleCommentChange(categories[currentCategory].id, q.id, e.target.value)}
+                                    />
                                 </div>
-                                <textarea
-                                    className="input-textarea"
-                                    placeholder="Kommentar hinzufügen"
-                                    value={q.comment || ""}
-                                    onChange={(e) => handleCommentChange(categories[currentCategory].id, q.id, e.target.value)}
-                                />
-                            </div>
                         ))}
+                        </div>
 
                         <div className="button-group">
                             {currentCategory > 0 && <button className="btn btn-secondary" onClick={() => setCurrentCategory(currentCategory - 1)}>⬅ Zurück</button>}
-                            {currentCategory < categories.length - 1 && <button className="btn btn-primary" onClick={handleNextCategory}>Weiter ➡</button>}
+                            {currentCategory < categories.length - 1 && <button className="btn btn-primary btn-next" onClick={handleNextCategory}>Weiter ➡</button>}
                         </div>
                     </div>
                 )}

@@ -5,12 +5,13 @@
   "author": "Yevhenii Petler",
   "main": "main.js",
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set PORT=3000 && react-scripts start",
     "build": "react-scripts build",
     "electron-start": "electron .",
     "electron-pack": "electron-builder"
   },
   "dependencies": {
+    "axios": "^1.8.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -20,6 +21,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "latest",
+    "sqlite3": "^5.1.7",
     "web-vitals": "^4.2.4"
   },
   "devDependencies": {
