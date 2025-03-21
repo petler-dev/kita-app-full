@@ -2,7 +2,14 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const cors = require('cors');
-app.use(cors());
+app.use(cors({
+    orogin: "*",
+    methods:
+    "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials:true,
+    allowedHeaders:
+    "Content-Type,Authorization"
+}));
 app.use(express.json());
 
 // Подключение к SQLite (файл mydatabase.db)

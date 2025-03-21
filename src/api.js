@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.178.177:3001'; // URL вашего сервера
+const API_BASE_URL = 'http://192.168.1.61:3001'; // URL вашего сервера
 
 export const getCategories = async () => {
     const response = await axios.get(`${API_BASE_URL}/categories`);
