@@ -71,8 +71,6 @@ export default function AdminPanel() {
         );
     };
 
-
-
     const handleDeleteCategory = async (categoryId) => {
         await deleteCategory(categoryId);
         setCategories(categories.filter(cat => cat.id !== categoryId));
@@ -99,40 +97,53 @@ export default function AdminPanel() {
     };
 
     const handleSyncToLocalStorage = () => {
-        localStorage.setItem("categories", JSON.stringify(categories));
-        alert("Kategorien wurden für Mitarbeiter gespeichert.");
+        setSavingStatus("saving");
+
+        setTimeout(() => {
+            localStorage.setItem("categories", JSON.stringify(categories));
+            setSavingStatus("saved");
+
+            setTimeout(() => {
+                setSavingStatus("");
+            }, 2000);
+        }, 1500);
     };
+
+
+    const [savingStatus, setSavingStatus] = useState("");
 
     if (!isAuthenticated) {
         return (
             <div id="wrapper">
                 <div className="container">
-                    <div className="login-form">
-                        <h1>🔒 Admin Login</h1>
-                        <div className="form-group">
-                            <label>Benutzername</label>
-                            <input
-                                className="input-field"
-                                type="text"
-                                placeholder="Benutzername"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                            />
+                    <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+                        <div className="login-form">
+                            <h1>🔒 Admin Login</h1>
+                            <div className="form-group">
+                                <label>Benutzername</label>
+                                <input
+                                    className="input-field"
+                                    type="text"
+                                    placeholder="Benutzername"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Passwort</label>
+                                <input
+                                    className="input-field"
+                                    type="password"
+                                    placeholder="Passwort"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
+                            <button className="btn btn-primary" onClick={handleLogin}>
+                                Einloggen
+                            </button>
                         </div>
-                        <div className="form-group">
-                            <label>Passwort</label>
-                            <input
-                                className="input-field"
-                                type="password"
-                                placeholder="Passwort"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
-                        <button className="btn btn-primary" onClick={handleLogin}>
-                            Einloggen
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         );
@@ -143,20 +154,14 @@ export default function AdminPanel() {
             <div className="container">
                 <div className="admin-panel">
                     <h1>🛠 Admin Panel</h1>
-
-
-
-
                     <button className="btn btn-red" onClick={handleLogout}>
                         🔒 Abmelden
                     </button>
-
-                    <button className="btn btn-green" onClick={handleSyncToLocalStorage}>
-                        💾 Für Mitarbeiter speichern
+                    <button className={`btn btn-green ${savingStatus}`} onClick={handleSyncToLocalStorage} disabled={savingStatus !== ""}>
+                        {savingStatus === "saving" ? "💾 Speichert..." : savingStatus === "saved" ? "✅ Gespeichert" : "💾 Für Mitarbeiter speichern"}
                     </button>
 
                     {categories.length === 0 && <p>⚠ Noch keine Kategorien erstellt</p>}
-
                     {ageOptions.map((age) => {
                         const isOpen = openAges.includes(age);
                         return (
@@ -164,17 +169,14 @@ export default function AdminPanel() {
                                 <h2 onClick={() => toggleAge(age)}>
                                     🧒 Altersklasse: {age}
                                 </h2>
-
                                 {isOpen && (
                                     <div className="age-content">
                                         <button className="btn btn-yellow" onClick={() => handleAddCategory(age)}>
                                             ➕ Kategorie für {age} hinzufügen
                                         </button>
-
                                         {categories.filter(cat => cat.age === age).length === 0 && (
                                             <p>⚠ Noch keine Kategorien für dieses Alter</p>
                                         )}
-
                                         {categories
                                             .filter(cat => cat.age === age)
                                             .map((category) => (
@@ -204,9 +206,9 @@ export default function AdminPanel() {
                                                                 {category.questions.map((q) => (
                                                                     <div key={q.id} className="question-block">
                                                                         <input
-                                                                            className="input-field"
+                                                                            className="input-field question-field"
                                                                             placeholder="Frage eingeben"
-                                                                            value={q.text}
+                                                                            value={q.text || ""}
                                                                             onChange={(e) => {
                                                                                 const updatedCategories = categories.map(cat =>
                                                                                     cat.id === category.id
@@ -216,14 +218,40 @@ export default function AdminPanel() {
                                                                                                 qItem.id === q.id
                                                                                                     ? { ...qItem, text: e.target.value }
                                                                                                     : qItem
-                                                                                            ),
+                                                                                            )
                                                                                         }
                                                                                         : cat
                                                                                 );
                                                                                 setCategories(updatedCategories);
-                                                                                updateQuestion(category.id, q.id, e.target.value);
+                                                                                updateQuestion(category.id, q.id, e.target.value, q.tooltip);
                                                                             }}
                                                                         />
+                                                                        <textarea
+                                                                            className="input-field"
+                                                                            placeholder="Tooltip eingeben"
+                                                                            value={q.tooltip || ""}
+                                                                            onInput={(e) => {
+                                                                                e.target.style.height = "auto";
+                                                                                e.target.style.height = `${e.target.scrollHeight}px`;
+                                                                            }}
+                                                                            onChange={(e) => {
+                                                                                const updatedCategories = categories.map(cat =>
+                                                                                    cat.id === category.id
+                                                                                        ? {
+                                                                                            ...cat,
+                                                                                            questions: cat.questions.map(qItem =>
+                                                                                                qItem.id === q.id
+                                                                                                    ? { ...qItem, tooltip: e.target.value }
+                                                                                                    : qItem
+                                                                                            )
+                                                                                        }
+                                                                                        : cat
+                                                                                );
+                                                                                setCategories(updatedCategories);
+                                                                                updateQuestion(category.id, q.id, q.text, e.target.value);
+                                                                            }}
+                                                                      />
+
                                                                         <button className="btn btn-red" onClick={() => handleDeleteQuestion(q.id, category.id)}>
                                                                             ❌ Frage löschen
                                                                         </button>
@@ -239,10 +267,6 @@ export default function AdminPanel() {
                             </div>
                         );
                     })}
-
-
-
-
                 </div>
             </div>
         </div>

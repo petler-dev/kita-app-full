@@ -26,8 +26,8 @@ export const deleteCategory = async (id) => {
     return response.data;
 };
 
-export const addQuestion = async (categoryId, text) => {
-    const response = await axios.post(`${API_BASE_URL}/categories/${categoryId}/questions`, { text });
+export const addQuestion = async (categoryId, text, tooltip = "") => {
+    const response = await axios.post(`${API_BASE_URL}/categories/${categoryId}/questions`, { text, tooltip });
     return response.data;
 };
 
@@ -36,7 +36,7 @@ export const deleteQuestion = async (categoryId, questionId) => {
     return response.data;
 };
 
-export const updateQuestion = async (categoryId, questionId, text) => {
-    const response = await axios.put(`${API_BASE_URL}/categories/${categoryId}/questions/${questionId}`, { text });
+export const updateQuestion = async (categoryId, questionId, text, tooltip) => {
+    const response = await axios.put(`${API_BASE_URL}/categories/${categoryId}/questions/${questionId}`, { text, tooltip });
     return response.data;
 };

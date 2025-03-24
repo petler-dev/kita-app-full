@@ -1,6 +1,28 @@
 import React, { useState, useEffect } from "react";
-import jsPDF from "jspdf";
-import { getCategories } from "./api"; // Импорт API
+import { getCategories } from "./api";
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import ChildReportPDF from './ChildReportPDF';
+import { format } from 'date-fns';
+
+function manualTextSplit(doc, text, maxWidth) {
+    const words = text.split(' ');
+    let lines = [];
+    let currentLine = words[0];
+
+    for (let i = 1; i < words.length; i++) {
+        const testLine = currentLine + ' ' + words[i];
+        const testWidth = doc.getStringUnitWidth(testLine) * doc.internal.scaleFactor;
+
+        if (testWidth < maxWidth) {
+            currentLine = testLine;
+        } else {
+            lines.push(currentLine);
+            currentLine = words[i];
+        }
+    }
+    lines.push(currentLine);
+    return lines;
+}
 
 export default function EmployeePanel() {
 
@@ -22,13 +44,19 @@ export default function EmployeePanel() {
     }, []);
 
     const handleRefresh = async () => {
-        try {
-            const data = await getCategories(selectedAge);
+        setRefreshStatus("refreshing");
+
+        setTimeout(async () => {
+            const data = await getCategories();
             setCategories(data);
-        } catch (error) {
-            console.error("Fehler beim Aktualisieren:", error);
-        }
+            setRefreshStatus("updated");
+
+            setTimeout(() => {
+                setRefreshStatus("");
+            }, 2000);
+        }, 1500);
     };
+
     const [currentCategory, setCurrentCategory] = useState(0);
     const [childData, setChildData] = useState({
         name: "",
@@ -41,30 +69,23 @@ export default function EmployeePanel() {
     const [visitedCategories, setVisitedCategories] = useState([]);
     const [allVisited, setAllVisited] = useState(false);
 
-    // ✅ Добавляем текущую категорию в visitedCategories при изменении currentCategory
     useEffect(() => {
         if (categories.length > 0 && !visitedCategories.includes(categories[currentCategory]?.id)) {
             setVisitedCategories(prev => [...prev, categories[currentCategory].id]);
         }
     }, [currentCategory, categories, visitedCategories]);
 
-    // ✅ Проверяем, все ли категории посещены
     useEffect(() => {
         const allVisited = categories.length > 0 && categories.every(category => visitedCategories.includes(category.id));
         setAllVisited(allVisited);
-        console.log("Все категории посещены?", allVisited);
-        console.log("Посещённые категории:", visitedCategories);
-        console.log("Все категории:", categories);
     }, [visitedCategories, categories]);
 
-    // ✅ Обработка перехода к следующей категории
     const handleNextCategory = () => {
         if (currentCategory < categories.length - 1) {
             setCurrentCategory(currentCategory + 1);
         }
     };
 
-    // ✅ Обработка ответа на вопрос
     const handleAnswer = (categoryId, questionId, value) => {
         const updatedCategories = categories.map(cat =>
             cat.id === categoryId
@@ -80,7 +101,6 @@ export default function EmployeePanel() {
         localStorage.setItem("categories", JSON.stringify(updatedCategories));
     };
 
-    // ✅ Обработка комментария
     const handleCommentChange = (categoryId, questionId, value) => {
         const updatedCategories = categories.map(cat =>
             cat.id === categoryId
@@ -96,100 +116,22 @@ export default function EmployeePanel() {
         localStorage.setItem("categories", JSON.stringify(updatedCategories));
     };
 
-    // ✅ Генерация PDF
-    const handleGeneratePDF = () => {
-        const doc = new jsPDF();
-
-        const childName = childData?.name?.trim() ? childData.name : "Entwicklungsstand des Kindes";
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(22);
-        doc.text(childName, 15, 20);
-
-        const currentDate = new Date().toLocaleDateString("de-DE");
-        doc.setFontSize(12);
-        doc.text(currentDate, 180, 20, { align: "right" });
-
-        let y = 40;
-
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-
-        const childDetails = [
-            { label: "Geschlecht:", value: childData?.gender || "-" },
-            { label: "Geburtsjahr:", value: childData?.birthYear || "-" },
-            { label: "Erzieher:", value: childData?.educator || "-" },
-            { label: "Gruppe:", value: childData?.group || "-" },
-            { label: "Altersklasse:", value: childData?.age || "-" }
-        ];
-
-        childDetails.forEach(detail => {
-            doc.text(`${detail.label} ${detail.value}`, 15, y);
-            y += 8;
-        });
-
-        y += 15;
-
-        categories.forEach((category, catIndex) => {
-            if (!category?.name?.trim()) return;
-
-            doc.setFillColor(230, 230, 230);
-            doc.roundedRect(10, y, 190, 10, 2, 2, "F");
-            doc.setFontSize(18);
-            doc.setFont("helvetica", "bold");
-            doc.text(category.name.toUpperCase(), 15, y + 7);
-            y += 20;
-
-            (category.questions || []).forEach((q, qIndex) => {
-                let color = [0, 0, 0];
-
-                if (q.answer === "Ich weiß nicht") color = [150, 150, 150];
-                if (q.answer === "Kann es teilweise") color = [255, 165, 0];
-                if (q.answer === "Kann es") color = [0, 128, 0];
-
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "bold");
-
-                // Разбиваем текст вопроса на строки
-                const questionLines = doc.splitTextToSize(`${qIndex + 1}. ${q?.text || "-"}`, 180);
-                doc.text(questionLines, 15, y);
-                y += questionLines.length * 6; // Увеличиваем y в зависимости от количества строк
-
-                doc.setTextColor(...color);
-                doc.text(q?.answer || "-", 180, y, { align: "right" });
-                doc.setTextColor(0, 0, 0);
-
-                y += 6;
-
-                if (q?.comment?.trim()) {
-                    doc.setFontSize(12);
-                    doc.setFont("helvetica", "normal");
-
-                    // Разбиваем текст комментария на строки
-                    const commentLines = doc.splitTextToSize(`Kommentar: ${q.comment}`, 180);
-                    doc.text(commentLines, 15, y);
-                    y += commentLines.length * 6; // Увеличиваем y в зависимости от количества строк
-                }
-
-                y += 10;
-            });
-
-            y += 10;
-        });
-
-        doc.save(`${childName}.pdf`);
+    const getColor = (answer) => {
+        return answer === "Ich weiß nicht" ? "#969696" :
+            answer === "Kann es teilweise" ? "#FFA500" :
+                answer === "Kann es" ? "#008000" : "#000000";
     };
+
+    const [refreshStatus, setRefreshStatus] = useState("");
 
     return (
         <div id="wrapper">
             <div className="container">
                 <h1>👩‍🏫 Mitarbeiter-Bereich</h1>
-
-                <button className="btn btn-blue" onClick={handleRefresh}>
-                    🔄 Kategorien aktualisieren
+                <button className={`btn btn-blue ${refreshStatus}`} onClick={handleRefresh} disabled={refreshStatus !== ""}>
+                    {refreshStatus === "refreshing" ? "🔄 Aktualisiert..." : refreshStatus === "updated" ? "✅ Aktualisiert" : "🔄 Aktualisieren"}
                 </button>
-
                 <div className="input-group">
-                    {/* 📋 Данные ребёнка */}
                     <div className="form-group">
                         <label>Name des Kindes</label>
                         <input
@@ -276,7 +218,13 @@ export default function EmployeePanel() {
                         <div className="question-holder">
                         {categories[currentCategory].questions.map((q) => (
                                 <div key={q.id} className="question-block">
-                                    <p>{q.text}</p>
+                                    <div className="question-holder">
+                                        {q.tooltip && (
+                                            <span className="tooltip-icon" data-tooltip={q.tooltip}> ℹ️</span>
+                                        )}
+                                        <p>{q.text}</p>
+
+                                    </div>
                                     <div className="button-group button-color">
                                         <button className={`btn btn-gray ${q.answer === "Ich weiß nicht" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Ich weiß nicht")}>Ich weiß nicht</button>
                                         <button className={`btn btn-yellow ${q.answer === "Kann es teilweise" ? "selected" : ""}`} onClick={() => handleAnswer(categories[currentCategory].id, q.id, "Kann es teilweise")}>Kann es teilweise</button>
@@ -299,9 +247,17 @@ export default function EmployeePanel() {
                     </div>
                 )}
 
-                {/* Кнопка генерации PDF */}
                 {allVisited && (
-                    <button className="btn btn-primary" onClick={handleGeneratePDF}>📄 PDF Generieren</button>
+                    <PDFDownloadLink
+                        document={<ChildReportPDF childData={childData} categories={categories} />}
+                        fileName={`${childData.name.replace(/\s+/g, '_') || 'Kind'}.pdf`}
+                    >
+                        {({ loading }) => (
+                            <button className="btn btn-primary">
+                                {loading ? 'PDF wird erstellt...' : '📄 PDF Herunterladen'}
+                            </button>
+                        )}
+                    </PDFDownloadLink>
                 )}
             </div>
         </div>

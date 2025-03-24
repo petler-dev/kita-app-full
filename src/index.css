@@ -194,6 +194,16 @@ body {
 .btn-green {
   background-color: #32cd32;
   color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-green.saving {
+  background-color: #f0ad4e !important;
+  cursor: wait;
+}
+
+.btn-green.saved {
+  background-color: #5cb85c !important;
 }
 
 /* Контейнер категории */
@@ -288,6 +298,49 @@ body {
   animation: fadeIn 0.3s ease;
 }
 
+.question-holder {
+  position: relative;
+}
+
+.admin-panel .question-block .input-field.question-field {
+  margin-bottom: 20px;
+}
+
+.tooltip-container {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.tooltip-icon {
+  display: inline-block;
+  font-size: 16px;
+  color: #007bff;
+  cursor: help;
+  position: relative;
+}
+
+.tooltip-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: 150%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: normal;
+  max-width: 250px; /* Ограничиваем ширину */
+  text-align: center;
+  word-wrap: break-word;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+
+
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -330,6 +383,16 @@ body {
 
   .btn.btn-blue {
     margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-blue.refreshing {
+    background-color: #f0ad4e !important;
+    cursor: wait;
+  }
+
+  .btn-blue.updated {
+    background-color: #5cb85c !important;
   }
 
   .button-group {

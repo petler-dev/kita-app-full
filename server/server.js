@@ -12,11 +12,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Подключение к SQLite (файл mydatabase.db)
 const db = new sqlite3.Database('./mydatabase.db');
 
 
-// Создание таблиц (если их нет)
 db.serialize(() => {
     db.run(`
     CREATE TABLE IF NOT EXISTS categories (
@@ -38,7 +36,6 @@ db.serialize(() => {
   `);
 });
 
-// Получить все категории
 app.get('/categories', (req, res) => {
     db.all('SELECT * FROM categories', (err, categories) => {
         if (err) {
@@ -56,12 +53,22 @@ app.get('/categories', (req, res) => {
             }
 
             const categoriesWithQuestions = filteredCategories.map(category => {
-                const categoryQuestions = questions.filter(q => q.category_id === category.id);
+                const categoryQuestions = questions
+                    .filter(q => q.category_id === category.id)
+                    .map(q => ({
+                        id: q.id,
+                        text: q.text,
+                        tooltip: q.tooltip || "",
+                        answer: q.answer,
+                        comment: q.comment
+                    }));
+
                 return {
                     ...category,
                     questions: categoryQuestions
                 };
             });
+
 
             res.json(categoriesWithQuestions);
         });
@@ -69,14 +76,11 @@ app.get('/categories', (req, res) => {
 });
 
 
-
-// Добавить вопрос
 app.post('/categories/:categoryId/questions', (req, res) => {
     const { categoryId } = req.params;
-    const { text } = req.body;
-
+    const { text, tooltip } = req.body;
     db.run(
-        'INSERT INTO questions (category_id, text) VALUES (?, ?)',
+        'INSERT INTO questions (category_id, text, tooltip) VALUES (?, ?, ?)',
         [categoryId, text],
         function (err) {
             if (err) {
@@ -87,7 +91,6 @@ app.post('/categories/:categoryId/questions', (req, res) => {
     );
 });
 
-// Удалить вопрос
 app.delete('/categories/:categoryId/questions/:questionId', (req, res) => {
     const { questionId } = req.params;
 
@@ -99,7 +102,6 @@ app.delete('/categories/:categoryId/questions/:questionId', (req, res) => {
     });
 });
 
-// Удалить категорию (+ каскадно удалить вопросы)
 app.delete('/categories/:id', (req, res) => {
     const { id } = req.params;
 
@@ -114,7 +116,6 @@ app.delete('/categories/:id', (req, res) => {
     });
 });
 
-// Обновить категорию
 app.put('/categories/:id', (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
@@ -127,8 +128,6 @@ app.put('/categories/:id', (req, res) => {
     });
 });
 
-
-// Добавить категорию
 app.post('/categories', (req, res) => {
     const { name, age } = req.body;
     db.run('INSERT INTO categories (name, age) VALUES (?, ?)', [name, age], function(err) {
@@ -141,10 +140,10 @@ app.post('/categories', (req, res) => {
 
 app.put('/categories/:categoryId/questions/:questionId', (req, res) => {
     const { questionId } = req.params;
-    const { text } = req.body;
-
+    const { text, tooltip } = req.body;
     db.run(
-        'UPDATE questions SET text = ? WHERE id = ?',
+        'UPDATE questions SET text = ?, tooltip = ? WHERE id = ?',
+        [text, tooltip, questionId],
         [text, questionId],
         function (err) {
             if (err) {
@@ -155,7 +154,6 @@ app.put('/categories/:categoryId/questions/:questionId', (req, res) => {
     );
 });
 
-// Запуск сервера
 const PORT = 3001;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server run on http://localhost:${PORT}`);

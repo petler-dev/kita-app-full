@@ -40,42 +40,34 @@ export default function Assessment() {
             group: "",
             age: ""
         });
-        setCategories([]); // Очистка всех категорий и вопросов
-        setNameError(false); // Сброс ошибки имени
+        setCategories([]);
+        setNameError(false);
     };
 
-
-
-    // ✅ Добавление вопроса в категорию
     const handleAddQuestion = (catIndex) => {
         const updatedCategories = [...categories];
         updatedCategories[catIndex].questions.push({ text: "", info: "", answer: "" });
         setCategories(updatedCategories);
     };
 
-    // ✅ Удаление категории
     const handleDeleteCategory = (catIndex) => {
         setCategories(categories.filter((_, index) => index !== catIndex));
     };
 
-    // ✅ Удаление вопроса
     const handleDeleteQuestion = (catIndex, qIndex) => {
         const updatedCategories = [...categories];
         updatedCategories[catIndex].questions = updatedCategories[catIndex].questions.filter((_, index) => index !== qIndex);
         setCategories(updatedCategories);
     };
 
-    // ✅ Выбор ответа (цветная кнопка)
     const handleAnswer = (catIndex, qIndex, value) => {
         const updatedCategories = [...categories];
         const question = updatedCategories[catIndex].questions[qIndex];
 
         if (question.answer === value) {
-            // Если нажали на ту же кнопку — убираем ответ
             question.answer = "";
             question.selected = false;
         } else {
-            // Устанавливаем новый ответ и вешаем selected
             question.answer = value;
             question.selected = true;
         }
@@ -86,8 +78,6 @@ export default function Assessment() {
 
     const handleGeneratePDF = () => {
         const doc = new jsPDF();
-
-        // Заголовок с именем ребёнка и датой
         const childName = childData.name.trim() !== "" ? childData.name : "Entwicklungsstand des Kindes";
         doc.setFont("helvetica", "bold");
         doc.setFontSize(22);
@@ -112,15 +102,13 @@ export default function Assessment() {
 
         childDetails.forEach(detail => {
             doc.text(`${detail.label} ${detail.value || "-"}`, 15, y);
-            y += 8; // Смещение вниз для нового элемента
+            y += 8;
         });
 
-        y += 15; // Отступ после данных ребёнка
+        y += 15;
 
         categories.forEach((category, catIndex) => {
             if (!category?.category?.trim()) return;
-
-            // Заголовок категории с отступом
 
             doc.setFillColor(230, 230, 230);
             doc.roundedRect(10, y, 190, 10, 2, 2, "F");
@@ -135,20 +123,16 @@ export default function Assessment() {
                 if (q.answer === "Kann es teilweise") color = [255, 165, 0];
                 if (q.answer === "Kann es") color = [0, 128, 0];
 
-                // Вопрос с отступом
                 doc.setFontSize(14);
                 doc.setFont("helvetica", "bold");
                 doc.text(`${qIndex + 1}. ${q.text}`, 15, y);
 
-                // Ответ теперь по высоте вопроса!
                 doc.setTextColor(...color);
                 doc.setFontSize(12);
                 doc.text(q.answer || "", 160, y, { align: "right" });
                 doc.setTextColor(0, 0, 0);
-
                 y += 6;
 
-                // Комментарий
                 if (q.info) {
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "normal");
@@ -156,10 +140,10 @@ export default function Assessment() {
                     y += 6;
                 }
 
-                y += 10; // Отступ между вопросами
+                y += 10;
             });
 
-            y += 10; // Отступ между категориями
+            y += 10;
         });
 
         doc.save(`${childName}.pdf`);
@@ -173,11 +157,11 @@ export default function Assessment() {
                 <div className="form-group name-input">
                     <label>Name des Kindes</label>
                     <input
-                        className={`input-field ${nameError ? "error-border" : ""}`} // Добавляем класс при ошибке
+                        className={`input-field ${nameError ? "error-border" : ""}`}
                         value={childData.name}
                         onChange={(e) => {
                             setChildData({ ...childData, name: e.target.value });
-                            if (e.target.value.trim()) setNameError(false); // Сбрасываем ошибку при вводе
+                            if (e.target.value.trim()) setNameError(false);
                         }}
                     />
                     {nameError && <p className="warning-text">Bitte geben Sie den Namen des Kindes ein.</p>}
