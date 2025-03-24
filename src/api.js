@@ -1,16 +1,20 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.1.61:3001'; // URL вашего сервера
+const API_BASE_URL = 'http://192.168.178.177:3001'; // URL вашего сервера
 
-export const getCategories = async () => {
-    const response = await axios.get(`${API_BASE_URL}/categories`);
+export const getCategories = async (age) => {
+    const response = await axios.get(`${API_BASE_URL}/categories`, {
+        params: { age },
+    });
     return response.data;
 };
 
-export const addCategory = async (name) => {
-    const response = await axios.post(`${API_BASE_URL}/categories`, { name });
+
+export const addCategory = async (name, age) => {
+    const response = await axios.post(`${API_BASE_URL}/categories`, { name, age });
     return response.data;
 };
+
 
 export const updateCategory = async (id, name) => {
     const response = await axios.put(`${API_BASE_URL}/categories/${id}`, { name });

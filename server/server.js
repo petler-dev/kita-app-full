@@ -21,7 +21,8 @@ db.serialize(() => {
     db.run(`
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      age TEXT NOT NULL
     )
   `);
 
@@ -44,14 +45,17 @@ app.get('/categories', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
 
-        // Получаем все вопросы
+        const filterAge = req.query.age;
+        const filteredCategories = filterAge
+            ? categories.filter(cat => cat.age === filterAge)
+            : categories;
+
         db.all('SELECT * FROM questions', (err, questions) => {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
 
-            // Группируем вопросы по категориям
-            const categoriesWithQuestions = categories.map(category => {
+            const categoriesWithQuestions = filteredCategories.map(category => {
                 const categoryQuestions = questions.filter(q => q.category_id === category.id);
                 return {
                     ...category,
@@ -63,6 +67,7 @@ app.get('/categories', (req, res) => {
         });
     });
 });
+
 
 
 // Добавить вопрос
@@ -125,8 +130,8 @@ app.put('/categories/:id', (req, res) => {
 
 // Добавить категорию
 app.post('/categories', (req, res) => {
-    const { name } = req.body;
-    db.run('INSERT INTO categories (name) VALUES (?)', [name], function(err) {
+    const { name, age } = req.body;
+    db.run('INSERT INTO categories (name, age) VALUES (?, ?)', [name, age], function(err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }

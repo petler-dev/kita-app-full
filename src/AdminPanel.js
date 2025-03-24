@@ -11,10 +11,12 @@ import {
 
 export default function AdminPanel() {
     const [categories, setCategories] = useState([]);
+    const ageOptions = ["48 Monate", "54 Monate", "60 Monate", "66 Monate", "72 Monate"];
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [admins, setAdmins] = useState([]);
+    const [openAges, setOpenAges] = useState([]);
 
     useEffect(() => {
         fetch("/admins.json")
@@ -58,10 +60,18 @@ export default function AdminPanel() {
         localStorage.removeItem("isAuthenticated");
     };
 
-    const handleAddCategory = async () => {
-        const newCategory = await addCategory("Neue Kategorie");
-        setCategories([...categories, newCategory]);
+    const handleAddCategory = async (age) => {
+        const newCategory = await addCategory("", age);
+        setCategories([...categories, { ...newCategory, name: "", age, questions: [] }]);
     };
+
+    const toggleAge = (age) => {
+        setOpenAges((prev) =>
+            prev.includes(age) ? prev.filter((a) => a !== age) : [...prev, age]
+        );
+    };
+
+
 
     const handleDeleteCategory = async (categoryId) => {
         await deleteCategory(categoryId);
@@ -133,75 +143,106 @@ export default function AdminPanel() {
             <div className="container">
                 <div className="admin-panel">
                     <h1>🛠 Admin Panel</h1>
+
+
+
+
                     <button className="btn btn-red" onClick={handleLogout}>
                         🔒 Abmelden
                     </button>
 
-                    <button className="btn btn-yellow" onClick={handleAddCategory}>
-                        ➕ Kategorie hinzufügen
-                    </button>
                     <button className="btn btn-green" onClick={handleSyncToLocalStorage}>
                         💾 Für Mitarbeiter speichern
                     </button>
 
                     {categories.length === 0 && <p>⚠ Noch keine Kategorien erstellt</p>}
 
-                    {categories.map((category) => (
-                        <div key={category.id} className="category-container">
-                            <input
-                                className="category-title input-field"
-                                placeholder="Kategorie Name"
-                                value={category.name}
-                                onChange={(e) => {
-                                    const updatedCategories = categories.map(cat =>
-                                        cat.id === category.id ? { ...cat, name: e.target.value } : cat
-                                    );
-                                    setCategories(updatedCategories);
-                                    updateCategory(category.id, e.target.value);
-                                }}
-                            />
+                    {ageOptions.map((age) => {
+                        const isOpen = openAges.includes(age);
+                        return (
+                            <div key={age} className={`age-group ${isOpen ? "open" : ""}`}>
+                                <h2 onClick={() => toggleAge(age)}>
+                                    🧒 Altersklasse: {age}
+                                </h2>
 
-                            <button className="btn btn-blue" onClick={() => handleAddQuestion(category.id)}>
-                                ➕ Frage hinzufügen
-                            </button>
-                            <button className="btn btn-red" onClick={() => handleDeleteCategory(category.id)}>
-                                🗑️ Kategorie löschen
-                            </button>
+                                {isOpen && (
+                                    <div className="age-content">
+                                        <button className="btn btn-yellow" onClick={() => handleAddCategory(age)}>
+                                            ➕ Kategorie für {age} hinzufügen
+                                        </button>
 
-                            {category.questions?.length > 0 && (
-                                <div className="questions-container">
-                                    {category.questions.map((q) => (
-                                        <div key={q.id} className="question-block">
-                                            <input
-                                                className="input-field"
-                                                placeholder="Frage eingeben"
-                                                value={q.text}
-                                                onChange={(e) => {
-                                                    const updatedCategories = categories.map(cat =>
-                                                        cat.id === category.id
-                                                            ? {
-                                                                ...cat,
-                                                                questions: cat.questions.map(qItem =>
-                                                                    qItem.id === q.id
-                                                                        ? { ...qItem, text: e.target.value }
-                                                                        : qItem
-                                                                ),
-                                                            }
-                                                            : cat
-                                                    );
-                                                    setCategories(updatedCategories);
-                                                    updateQuestion(category.id, q.id, e.target.value);
-                                                }}
-                                            />
-                                            <button className="btn btn-red" onClick={() => handleDeleteQuestion(q.id, category.id)}>
-                                                ❌ Frage löschen
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                                        {categories.filter(cat => cat.age === age).length === 0 && (
+                                            <p>⚠ Noch keine Kategorien für dieses Alter</p>
+                                        )}
+
+                                        {categories
+                                            .filter(cat => cat.age === age)
+                                            .map((category) => (
+                                                <React.Fragment key={category.id}>
+                                                    <div className="category-container">
+                                                        <input
+                                                            className="category-title input-field"
+                                                            placeholder="Kategorie Name"
+                                                            value={category.name}
+                                                            onChange={(e) => {
+                                                                const updatedCategories = categories.map(cat =>
+                                                                    cat.id === category.id ? { ...cat, name: e.target.value } : cat
+                                                                );
+                                                                setCategories(updatedCategories);
+                                                                updateCategory(category.id, e.target.value);
+                                                            }}
+                                                        />
+                                                        <button className="btn btn-blue" onClick={() => handleAddQuestion(category.id)}>
+                                                            ➕ Frage hinzufügen
+                                                        </button>
+                                                        <button className="btn btn-red" onClick={() => handleDeleteCategory(category.id)}>
+                                                            🗑️ Kategorie löschen
+                                                        </button>
+
+                                                        {category.questions?.length > 0 && (
+                                                            <div className="questions-container">
+                                                                {category.questions.map((q) => (
+                                                                    <div key={q.id} className="question-block">
+                                                                        <input
+                                                                            className="input-field"
+                                                                            placeholder="Frage eingeben"
+                                                                            value={q.text}
+                                                                            onChange={(e) => {
+                                                                                const updatedCategories = categories.map(cat =>
+                                                                                    cat.id === category.id
+                                                                                        ? {
+                                                                                            ...cat,
+                                                                                            questions: cat.questions.map(qItem =>
+                                                                                                qItem.id === q.id
+                                                                                                    ? { ...qItem, text: e.target.value }
+                                                                                                    : qItem
+                                                                                            ),
+                                                                                        }
+                                                                                        : cat
+                                                                                );
+                                                                                setCategories(updatedCategories);
+                                                                                updateQuestion(category.id, q.id, e.target.value);
+                                                                            }}
+                                                                        />
+                                                                        <button className="btn btn-red" onClick={() => handleDeleteQuestion(q.id, category.id)}>
+                                                                            ❌ Frage löschen
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </React.Fragment>
+                                            ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+
+
+
+
                 </div>
             </div>
         </div>

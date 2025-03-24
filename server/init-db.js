@@ -13,7 +13,8 @@ db.serialize(() => {
     db.run(`
     CREATE TABLE categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL
+      name TEXT NOT NULL,
+      age TEXT NOT NULL
     )
   `);
 
@@ -30,8 +31,8 @@ db.serialize(() => {
 
 
     // Вставка тестовых данных (опционально)
-    db.run('INSERT INTO categories (name) VALUES (?)', ['Категория 1']);
-    db.run('INSERT INTO categories (name) VALUES (?)', ['Категория 2']);
+    db.run('INSERT INTO categories (name, age) VALUES (?, ?)', ['Категория 1', '48 Monate']);
+    db.run('INSERT INTO categories (name, age) VALUES (?, ?)', ['Категория 2', '54 Monate']);
 
     db.run(`
     INSERT INTO questions (category_id, text, answer, comment)

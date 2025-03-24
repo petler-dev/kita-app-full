@@ -252,6 +252,54 @@ body {
   margin-bottom: 35px;
 }
 
+.age-group {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.age-group h2 {
+  margin: 0;
+  padding: 12px 20px;
+  background-color: #f4f4f4;
+  font-size: 18px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.age-group h2::after {
+  content: "▼";
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.age-group.open h2::after {
+  transform: rotate(-180deg);
+}
+
+.age-content {
+  padding: 15px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 @media (min-width: 800px) {
   .container {
     min-width: 800px;

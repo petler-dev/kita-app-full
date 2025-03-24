@@ -5,13 +5,14 @@ import { getCategories } from "./api"; // Импорт API
 export default function EmployeePanel() {
 
     const [categories, setCategories] = useState([]);
-
+    const [selectedAge, setSelectedAge] = useState("48 Monate");
+    const ageOptions = ["48 Monate", "54 Monate", "60 Monate", "66 Monate", "72 Monate"];
 
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await getCategories();
+                const data = await getCategories(selectedAge);
                 setCategories(data);
             } catch (error) {
                 console.error("Fehler beim Laden der Kategorien:", error);
@@ -22,7 +23,7 @@ export default function EmployeePanel() {
 
     const handleRefresh = async () => {
         try {
-            const data = await getCategories();
+            const data = await getCategories(selectedAge);
             setCategories(data);
         } catch (error) {
             console.error("Fehler beim Aktualisieren:", error);
@@ -249,7 +250,14 @@ export default function EmployeePanel() {
                         <select
                             className="input-field"
                             value={childData.age || ""}
-                            onChange={(e) => setChildData({ ...childData, age: e.target.value })}
+                            onChange={async (e) => {
+                                const age = e.target.value;
+                                setChildData({ ...childData, age });
+                                const data = await getCategories(age);
+                                setCategories(data);
+                                setCurrentCategory(0);
+                                setVisitedCategories([]);
+                            }}
                         >
                             <option value="">Alter wählen</option>
                             <option value="48 Monate">48 Monate</option>
@@ -262,7 +270,7 @@ export default function EmployeePanel() {
                 </div>
 
                 {/* 🔽 Категории и вопросы */}
-                {categories.length > 0 && (
+                {childData.age && categories.length > 0 && (
                     <div className="category-container">
                         <h2>{categories[currentCategory].name}</h2>
                         <div className="question-holder">
