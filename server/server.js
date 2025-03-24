@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const cors = require('cors');
 app.use(cors({
-    orogin: "*",
+    origin: "*",
     methods:
     "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials:true,
