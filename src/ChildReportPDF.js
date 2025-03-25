@@ -30,29 +30,41 @@ const styles = StyleSheet.create({
         padding: 5,
         fontWeight: 'bold'
     },
-    question: {
+    questionRow: {
+        flexDirection: 'row',
+        marginBottom: 10,
+        alignItems: 'flex-start'
+    },
+    questionNumber: {
+        width: 20,
         fontSize: 12,
-        marginBottom: 5,
-        marginLeft: 10,
-        lineHeight: 1.3
+        marginRight: 5
+    },
+    questionText: {
+        fontSize: 12,
+        flex: 1,
+        lineHeight: 1.3,
+        textAlign: 'left'
     },
     answer: {
         fontSize: 12,
-        marginLeft: 20,
-        marginBottom: 10
+        width: 120,
+        textAlign: 'right',
+        paddingLeft: 10,
+        marginLeft: 'auto'
     },
     answerCan: {
-        color: '#4CAF50' // Зеленый
+        color: '#4CAF50'
     },
     answerPartial: {
-        color: '#FFA500' // Оранжевый
+        color: '#FFA500'
     },
     answerUnknown: {
-        color: '#808080' // Серый
+        color: '#808080'
     },
     comment: {
         fontSize: 11,
-        marginLeft: 25,
+        marginLeft: 30, // Увеличиваем отступ для комментария
         marginBottom: 10,
         color: '#555',
         fontStyle: 'italic'
@@ -60,7 +72,6 @@ const styles = StyleSheet.create({
 });
 
 const ChildReportPDF = ({ childData, categories }) => {
-    // Функция для стиля ответа
     const getAnswerStyle = (answer) => {
         const base = styles.answer;
         if (answer === 'Kann es') return [base, styles.answerCan];
@@ -71,15 +82,12 @@ const ChildReportPDF = ({ childData, categories }) => {
     return (
         <Document>
             <Page style={styles.page}>
-                {/* Заголовок и дата */}
                 <Text style={styles.header}>
                     {childData?.name || 'Kind'}
                 </Text>
                 <Text style={styles.date}>
                     {format(new Date(), 'dd.MM.yyyy')}
                 </Text>
-
-                {/* Данные ребенка */}
                 <View style={styles.childInfo}>
                     <Text>Geschlecht: {childData?.gender || '-'}</Text>
                     <Text>Geburtsjahr: {childData?.birthYear || '-'}</Text>
@@ -87,31 +95,30 @@ const ChildReportPDF = ({ childData, categories }) => {
                     <Text>Altersklasse: {childData?.age || '-'}</Text>
                     <Text>Erzieher: {childData?.educator || '-'}</Text>
                 </View>
-
-                {/* Категории и вопросы */}
                 {categories?.map(category => (
                     <View key={category.id} wrap={false}>
                         <Text style={styles.categoryTitle}>
                             {category.name?.toUpperCase()}
                         </Text>
-
                         {category.questions?.map((q, index) => (
-                            <View key={q.id} wrap={false}>
-                                {/* Вопрос */}
-                                <Text style={styles.question}>
-                                    {index + 1}. {q.text.replace(/@/g, '(at)')}
-                                </Text>
-
-                                {/* Ответ */}
-                                <Text style={getAnswerStyle(q.answer)}>
-                                    Antwort: {q.answer}
-                                </Text>
+                            <View key={q.id}>
+                                {/* Строка с вопросом и ответом */}
+                                <View style={styles.questionRow}>
+                                    <Text style={styles.questionNumber}>{index + 1}.</Text>
+                                    <Text style={styles.questionText}>{q.text}</Text>
+                                    <Text style={[
+                                        styles.answer,
+                                        q.answer === 'Kann es' && styles.answerCan,
+                                        q.answer === 'Kann es teilweise' && styles.answerPartial,
+                                        q.answer === 'Ich weiß nicht' && styles.answerUnknown
+                                    ]}>
+                                        {q.answer}
+                                    </Text>
+                                </View>
 
                                 {/* Комментарий (если есть) */}
                                 {q.comment && (
-                                    <Text style={styles.comment}>
-                                        Kommentar: {q.comment}
-                                    </Text>
+                                    <Text style={styles.comment}>Kommentar: {q.comment}</Text>
                                 )}
                             </View>
                         ))}
