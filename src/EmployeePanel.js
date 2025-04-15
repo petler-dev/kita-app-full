@@ -27,8 +27,8 @@ function manualTextSplit(doc, text, maxWidth) {
 export default function EmployeePanel() {
 
     const [categories, setCategories] = useState([]);
-    const [selectedAge, setSelectedAge] = useState("48 Monate");
-    const ageOptions = ["48 Monate", "54 Monate", "60 Monate", "66 Monate", "72 Monate"];
+    const [selectedAge, setSelectedAge] = useState("12 Monate");
+    const ageOptions = ["12 Monate", "18 Monate", "24 Monate", "30 Monate", "36 Monate", "42 Monate", "48 Monate", "54 Monate", "60 Monate", "66 Monate", "72 Monate"];;
 
 
     useEffect(() => {
@@ -202,6 +202,12 @@ export default function EmployeePanel() {
                             }}
                         >
                             <option value="">Alter wählen</option>
+                            <option value="12 Monate">12 Monate</option>
+                            <option value="18 Monate">18 Monate</option>
+                            <option value="24 Monate">24 Monate</option>
+                            <option value="30 Monate">30 Monate</option>
+                            <option value="36 Monate">36 Monate</option>
+                            <option value="42 Monate">42 Monate</option>
                             <option value="48 Monate">48 Monate</option>
                             <option value="54 Monate">54 Monate</option>
                             <option value="60 Monate">60 Monate</option>

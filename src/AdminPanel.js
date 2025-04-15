@@ -11,7 +11,7 @@ import {
 
 export default function AdminPanel() {
     const [categories, setCategories] = useState([]);
-    const ageOptions = ["48 Monate", "54 Monate", "60 Monate", "66 Monate", "72 Monate"];
+    const ageOptions = ["12 Monate", "18 Monate", "24 Monate", "30 Monate", "36 Monate", "42 Monate", "48 Monate", "54 Monate", "60 Monate", "66 Monate", "72 Monate"];
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
